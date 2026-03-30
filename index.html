@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Arb Value Calculator</title>
+<style>
+body{font-family:Arial;background:#0b1220;color:white;padding:20px}
+input,select{width:100%;padding:10px;margin:5px 0}
+button{padding:12px;margin-top:10px;width:100%}
+.card{background:#111827;padding:15px;border-radius:10px;margin-bottom:15px}
+</style>
+</head>
+<body>
+
+<h2>Arb Value Calculator (Auto Value)</h2>
+
+<div class="card">
+Odds 1<input id="o1" value="-110">
+Odds 2<input id="o2" value="+135">
+Total Stake<input id="stake" value="100">
+<button onclick="calc()">Calculate</button>
+</div>
+
+<div class="card">
+Best Setup: <div id="best"></div>
+ROI: <div id="roi"></div>
+</div>
+
+<script>
+function toDec(o){
+o=Number(o);
+return o>0?1+o/100:1+100/Math.abs(o);
+}
+
+function calc(){
+let d1=toDec(document.getElementById("o1").value);
+let d2=toDec(document.getElementById("o2").value);
+let t=Number(document.getElementById("stake").value);
+
+let s1=t*d2/(d1+d2);
+let s2=t*d1/(d1+d2);
+
+let p1=s1*d1-(s1+s2);
+let p2=s2*d2-(s1+s2);
+
+let roi1=p1/s1*100;
+let roi2=p2/s2*100;
+
+if(roi1>roi2){
+document.getElementById("best").innerText="Bet 1 is VALUE";
+document.getElementById("roi").innerText=roi1.toFixed(2)+"%";
+}else{
+document.getElementById("best").innerText="Bet 2 is VALUE";
+document.getElementById("roi").innerText=roi2.toFixed(2)+"%";
+}
+}
+</script>
+
+</body>
+</html>
