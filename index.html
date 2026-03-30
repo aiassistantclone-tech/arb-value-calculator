@@ -1,0 +1,634 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Arb Value Calculator</title>
+  <meta name="theme-color" content="#08111f" />
+  <style>
+    :root{
+      --bg:#06101d;
+      --bg2:#0b1326;
+      --panel:rgba(13,22,39,.82);
+      --panel-2:rgba(12,20,35,.92);
+      --border:rgba(148,163,184,.16);
+      --text:#eef4ff;
+      --muted:#9db0cd;
+      --green:#34d399;
+      --green-2:#6ee7b7;
+      --blue:#60a5fa;
+      --purple:#a78bfa;
+      --gold:#fbbf24;
+      --danger:#fca5a5;
+      --shadow:0 24px 70px rgba(0,0,0,.35);
+      --radius:24px;
+    }
+
+    *{box-sizing:border-box}
+    html,body{margin:0}
+    body{
+      min-height:100vh;
+      font-family: Inter, ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
+      color:var(--text);
+      background:
+        radial-gradient(circle at top left, rgba(96,165,250,.16), transparent 28%),
+        radial-gradient(circle at top right, rgba(167,139,250,.14), transparent 24%),
+        linear-gradient(180deg, var(--bg), var(--bg2));
+      padding:20px;
+    }
+
+    .wrap{max-width:1180px;margin:0 auto}
+    .hero{
+      display:flex;
+      justify-content:space-between;
+      align-items:flex-end;
+      gap:18px;
+      margin-bottom:18px;
+    }
+    .hero h1{
+      margin:0;
+      font-size:clamp(30px,4vw,44px);
+      letter-spacing:-0.04em;
+    }
+    .hero p{
+      margin:10px 0 0;
+      max-width:760px;
+      color:var(--muted);
+      line-height:1.6;
+      font-size:15px;
+    }
+    .top-badge{
+      white-space:nowrap;
+      padding:10px 14px;
+      border-radius:999px;
+      border:1px solid var(--border);
+      background:rgba(10,18,30,.55);
+      backdrop-filter:blur(12px);
+      color:#dbeafe;
+      font-size:13px;
+    }
+
+    .grid{
+      display:grid;
+      grid-template-columns:1.04fr .96fr;
+      gap:18px;
+      align-items:start;
+    }
+
+    .card{
+      background:var(--panel);
+      border:1px solid var(--border);
+      border-radius:var(--radius);
+      overflow:hidden;
+      backdrop-filter:blur(18px);
+      -webkit-backdrop-filter:blur(18px);
+      box-shadow:var(--shadow);
+    }
+
+    .card-head{
+      padding:18px 20px;
+      border-bottom:1px solid var(--border);
+      background:linear-gradient(180deg, rgba(255,255,255,.035), rgba(255,255,255,.01));
+    }
+    .card-head h2{
+      margin:0;
+      font-size:17px;
+      letter-spacing:.01em;
+    }
+    .card-head .sub{
+      margin-top:6px;
+      color:var(--muted);
+      font-size:13px;
+    }
+
+    .card-inner{padding:20px}
+
+    .dual,.triple{
+      display:grid;
+      gap:12px;
+      margin-bottom:14px;
+    }
+    .dual{grid-template-columns:1fr 1fr}
+    .triple{grid-template-columns:1fr 1fr 1fr}
+
+    .bet{
+      border:1px solid var(--border);
+      border-radius:20px;
+      padding:16px;
+      margin-bottom:14px;
+      background:linear-gradient(180deg, rgba(255,255,255,.022), rgba(255,255,255,.01));
+    }
+    .bet-title{
+      display:flex;
+      justify-content:space-between;
+      align-items:center;
+      gap:12px;
+      margin-bottom:12px;
+    }
+    .bet-title h3{
+      margin:0;
+      font-size:18px;
+    }
+    .dot{
+      width:10px;height:10px;border-radius:50%;
+      background:linear-gradient(180deg,var(--blue),var(--purple));
+      box-shadow:0 0 16px rgba(96,165,250,.75);
+    }
+
+    label{
+      display:block;
+      margin:0 0 8px;
+      font-size:12px;
+      letter-spacing:.08em;
+      text-transform:uppercase;
+      color:var(--muted);
+    }
+
+    input,select{
+      width:100%;
+      padding:14px 14px;
+      border-radius:16px;
+      border:1px solid var(--border);
+      background:rgba(8,14,24,.9);
+      color:var(--text);
+      outline:none;
+      font-size:16px;
+      transition:.18s ease;
+    }
+    input:focus,select:focus{
+      border-color:rgba(96,165,250,.65);
+      box-shadow:0 0 0 4px rgba(96,165,250,.12);
+    }
+
+    .actions{
+      display:flex;
+      gap:10px;
+      flex-wrap:wrap;
+      margin-top:8px;
+    }
+    button{
+      appearance:none;
+      border:0;
+      border-radius:16px;
+      padding:14px 18px;
+      font-size:15px;
+      font-weight:800;
+      cursor:pointer;
+      transition:transform .12s ease;
+    }
+    button:hover{transform:translateY(-1px)}
+    .primary{
+      background:linear-gradient(135deg, var(--green), #7dd3fc);
+      color:#062814;
+      flex:1 1 190px;
+    }
+    .secondary{
+      background:linear-gradient(135deg, rgba(96,165,250,.18), rgba(167,139,250,.22));
+      color:#dbeafe;
+      border:1px solid rgba(96,165,250,.16);
+      flex:1 1 150px;
+    }
+
+    .note{
+      margin-top:12px;
+      color:var(--muted);
+      font-size:13px;
+      line-height:1.6;
+    }
+
+    .best{
+      margin-bottom:12px;
+      padding:16px;
+      border:1px solid rgba(52,211,153,.22);
+      border-radius:20px;
+      background:linear-gradient(135deg, rgba(52,211,153,.12), rgba(96,165,250,.08));
+    }
+    .best .k{
+      color:var(--muted);
+      font-size:12px;
+      letter-spacing:.08em;
+      text-transform:uppercase;
+      margin-bottom:7px;
+    }
+    .best .v{
+      font-size:28px;
+      font-weight:900;
+      letter-spacing:-0.04em;
+    }
+    .best .s{
+      margin-top:6px;
+      color:var(--muted);
+      font-size:14px;
+      line-height:1.5;
+    }
+
+    .result-top{
+      display:grid;
+      gap:10px;
+      margin-bottom:12px;
+    }
+    .result-chip{
+      display:flex;
+      justify-content:space-between;
+      align-items:center;
+      gap:12px;
+      padding:14px;
+      border:1px solid var(--border);
+      border-radius:18px;
+      background:rgba(8,15,28,.76);
+    }
+    .result-chip-left{
+      display:flex;
+      align-items:center;
+      gap:10px;
+      flex-wrap:wrap;
+    }
+    .chip-title{
+      font-size:18px;
+      font-weight:800;
+    }
+    .chip-odds{
+      color:var(--muted);
+      font-size:15px;
+    }
+    .pill{
+      display:inline-flex;
+      align-items:center;
+      justify-content:center;
+      padding:7px 12px;
+      border-radius:999px;
+      font-size:12px;
+      font-weight:900;
+      letter-spacing:.04em;
+    }
+    .pill-value{
+      background:rgba(52,211,153,.16);
+      border:1px solid rgba(52,211,153,.26);
+      color:var(--green-2);
+    }
+    .pill-even{
+      background:rgba(251,191,36,.14);
+      border:1px solid rgba(251,191,36,.26);
+      color:#ffd76b;
+    }
+
+    .stats{
+      display:grid;
+      grid-template-columns:1fr 1fr;
+      gap:12px;
+    }
+    .stat{
+      min-height:96px;
+      padding:14px;
+      border:1px solid var(--border);
+      border-radius:18px;
+      background:rgba(8,15,28,.76);
+    }
+    .stat .k{
+      color:var(--muted);
+      font-size:12px;
+      letter-spacing:.08em;
+      text-transform:uppercase;
+      margin-bottom:8px;
+    }
+    .stat .v{
+      font-size:clamp(22px,3vw,30px);
+      font-weight:900;
+      letter-spacing:-0.03em;
+      word-break:break-word;
+    }
+
+    .good{color:var(--green-2)}
+    .bad{color:var(--danger)}
+
+    .summary{
+      margin-top:12px;
+      padding:14px;
+      border:1px solid var(--border);
+      border-radius:18px;
+      background:rgba(8,15,28,.72);
+      color:var(--muted);
+      font-size:14px;
+      line-height:1.65;
+    }
+
+    .footer{
+      margin-top:14px;
+      text-align:center;
+      color:var(--muted);
+      font-size:12px;
+    }
+
+    @media (max-width: 980px){
+      .grid{grid-template-columns:1fr}
+      .dual,.triple,.stats{grid-template-columns:1fr}
+      .hero{flex-direction:column;align-items:flex-start}
+      .card-head,.card-inner{padding:16px}
+      body{padding:14px}
+      button{flex:1 1 100%}
+    }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <div class="hero">
+      <div>
+        <h1>Arb Value Calculator</h1>
+        <p>Enter the two odds once. This calculator automatically selects the better value side, marks the other side as break even, and calculates the best total-stake setup for you.</p>
+      </div>
+      <div class="top-badge">Premium • Auto Value Side • GitHub Ready</div>
+    </div>
+
+    <div class="grid">
+      <section class="card">
+        <div class="card-head">
+          <h2>Inputs</h2>
+          <div class="sub">Option A: total-stake only, no manual mode.</div>
+        </div>
+        <div class="card-inner">
+          <div class="dual">
+            <div>
+              <label>Total Stake ($)</label>
+              <input id="totalStake" type="number" step="0.01" value="100">
+            </div>
+            <div>
+              <label>Stake Rounding</label>
+              <select id="rounding">
+                <option value="none" selected>No Rounding</option>
+                <option value="5">Round to nearest 5</option>
+                <option value="10">Round to nearest 10</option>
+              </select>
+            </div>
+          </div>
+
+          <div class="bet">
+            <div class="bet-title">
+              <h3>Bet 1</h3>
+              <div class="dot"></div>
+            </div>
+            <div class="triple">
+              <div>
+                <label>Odds</label>
+                <input id="odds1" type="text" value="-110">
+              </div>
+              <div>
+                <label>Odds Type</label>
+                <select id="oddsType1">
+                  <option value="american" selected>American</option>
+                  <option value="decimal">Decimal</option>
+                </select>
+              </div>
+              <div>
+                <label>Calculated Stake ($)</label>
+                <input id="stake1" type="number" step="0.01" value="0" readonly>
+              </div>
+            </div>
+          </div>
+
+          <div class="bet">
+            <div class="bet-title">
+              <h3>Bet 2</h3>
+              <div class="dot"></div>
+            </div>
+            <div class="triple">
+              <div>
+                <label>Odds</label>
+                <input id="odds2" type="text" value="+135">
+              </div>
+              <div>
+                <label>Odds Type</label>
+                <select id="oddsType2">
+                  <option value="american" selected>American</option>
+                  <option value="decimal">Decimal</option>
+                </select>
+              </div>
+              <div>
+                <label>Calculated Stake ($)</label>
+                <input id="stake2" type="number" step="0.01" value="0" readonly>
+              </div>
+            </div>
+          </div>
+
+          <div class="actions">
+            <button class="primary" onclick="calculate()">Calculate</button>
+            <button class="secondary" onclick="resetCalc()">Reset</button>
+          </div>
+
+          <div class="note">
+            The calculator checks both directions automatically, chooses the higher ROI result, and uses total-stake sizing only. This keeps the workflow simple and optimized.
+          </div>
+        </div>
+      </section>
+
+      <section class="card">
+        <div class="card-head">
+          <h2>Results</h2>
+          <div class="sub">Best setup selected automatically.</div>
+        </div>
+        <div class="card-inner">
+          <div class="best">
+            <div class="k">Recommended setup</div>
+            <div class="v" id="bestSetup">Bet 2 is the value side</div>
+            <div class="s" id="bestSetupSub">Best ROI: 0.00% · Alternate ROI: 0.00%</div>
+          </div>
+
+          <div class="result-top">
+            <div class="result-chip">
+              <div class="result-chip-left">
+                <div class="chip-title">Bet 1</div>
+                <div class="chip-odds" id="displayOdds1">(-110)</div>
+                <div class="pill pill-even" id="badge1">BREAK EVEN</div>
+              </div>
+            </div>
+
+            <div class="result-chip">
+              <div class="result-chip-left">
+                <div class="chip-title">Bet 2</div>
+                <div class="chip-odds" id="displayOdds2">(+135)</div>
+                <div class="pill pill-value" id="badge2">VALUE BET</div>
+              </div>
+            </div>
+          </div>
+
+          <div class="stats">
+            <div class="stat"><div class="k">Bet 1 Stake</div><div class="v" id="outStake1">$0.00</div></div>
+            <div class="stat"><div class="k">Bet 1 Payout</div><div class="v" id="outPayout1">$0.00</div></div>
+            <div class="stat"><div class="k">Bet 1 Profit/Loss</div><div class="v" id="outPL1">$0.00</div></div>
+
+            <div class="stat"><div class="k">Bet 2 Stake</div><div class="v" id="outStake2">$0.00</div></div>
+            <div class="stat"><div class="k">Bet 2 Payout</div><div class="v" id="outPayout2">$0.00</div></div>
+            <div class="stat"><div class="k">Bet 2 Profit/Loss</div><div class="v" id="outPL2">$0.00</div></div>
+
+            <div class="stat"><div class="k">Actual Total Stake</div><div class="v" id="outTotal">$0.00</div></div>
+            <div class="stat"><div class="k">Value Bet Profit</div><div class="v" id="outValueProfit">$0.00</div></div>
+            <div class="stat" style="grid-column:1/-1"><div class="k">ROI on Value Side</div><div class="v" id="outROI">0.00%</div></div>
+          </div>
+
+          <div class="summary" id="outExplain"></div>
+        </div>
+      </section>
+    </div>
+
+    <div class="footer">Single-file calculator. No backend required.</div>
+  </div>
+
+  <script>
+    function parseAmerican(val){
+      const s = String(val).trim().replace(/,/g, '');
+      if (!s) return NaN;
+      const n = Number(s);
+      return Number.isFinite(n) ? n : NaN;
+    }
+
+    function toDecimal(odds, type){
+      if(type === 'decimal'){
+        const d = Number(odds);
+        return d > 1 ? d : NaN;
+      }
+      const a = parseAmerican(odds);
+      if (!Number.isFinite(a) || a === 0) return NaN;
+      if (a > 0) return 1 + a/100;
+      return 1 + 100/Math.abs(a);
+    }
+
+    function roundStake(v, mode){
+      if(mode === '5') return Math.round(v/5)*5;
+      if(mode === '10') return Math.round(v/10)*10;
+      return Math.round(v*100)/100;
+    }
+
+    function money(v){
+      const sign = v < 0 ? '-' : '';
+      return sign + '$' + Math.abs(v).toFixed(2);
+    }
+
+    function setText(id, text, className=''){
+      const el = document.getElementById(id);
+      el.textContent = text;
+      el.className = 'v ' + className;
+    }
+
+    function formatOddsDisplay(raw, type){
+      const txt = String(raw).trim();
+      if(type === 'american'){
+        if(txt.startsWith('+') || txt.startsWith('-')) return `(${txt})`;
+        return `(${Number(txt) > 0 ? '+' + txt : txt})`;
+      }
+      return `(${txt})`;
+    }
+
+    function updateBadges(valueSide){
+      const badge1 = document.getElementById('badge1');
+      const badge2 = document.getElementById('badge2');
+
+      if(valueSide === '1'){
+        badge1.textContent = 'VALUE BET';
+        badge1.className = 'pill pill-value';
+        badge2.textContent = 'BREAK EVEN';
+        badge2.className = 'pill pill-even';
+      } else {
+        badge1.textContent = 'BREAK EVEN';
+        badge1.className = 'pill pill-even';
+        badge2.textContent = 'VALUE BET';
+        badge2.className = 'pill pill-value';
+      }
+    }
+
+    function computeScenario(d1, d2, totalStakeInput, rounding, valueSide){
+      let stake1 = totalStakeInput * d2 / (d1 + d2);
+      let stake2 = totalStakeInput * d1 / (d1 + d2);
+
+      if(rounding !== 'none'){
+        stake1 = roundStake(stake1, rounding);
+        stake2 = roundStake(stake2, rounding);
+      } else {
+        stake1 = Math.round(stake1 * 100) / 100;
+        stake2 = Math.round(stake2 * 100) / 100;
+      }
+
+      const payout1 = stake1 * d1;
+      const payout2 = stake2 * d2;
+      const totalStake = stake1 + stake2;
+      const pl1 = payout1 - totalStake;
+      const pl2 = payout2 - totalStake;
+
+      const valueProfit = valueSide === '1' ? pl1 : pl2;
+      const valueStake = valueSide === '1' ? stake1 : stake2;
+      const roi = valueStake > 0 ? (valueProfit / valueStake) * 100 : -Infinity;
+
+      return { valueSide, stake1, stake2, payout1, payout2, totalStake, pl1, pl2, valueProfit, roi };
+    }
+
+    function calculate(){
+      const totalStakeInput = Number(document.getElementById('totalStake').value || 0);
+      const odds1Raw = document.getElementById('odds1').value;
+      const odds2Raw = document.getElementById('odds2').value;
+      const oddsType1 = document.getElementById('oddsType1').value;
+      const oddsType2 = document.getElementById('oddsType2').value;
+      const d1 = toDecimal(odds1Raw, oddsType1);
+      const d2 = toDecimal(odds2Raw, oddsType2);
+      const rounding = document.getElementById('rounding').value;
+
+      document.getElementById('displayOdds1').textContent = formatOddsDisplay(odds1Raw, oddsType1);
+      document.getElementById('displayOdds2').textContent = formatOddsDisplay(odds2Raw, oddsType2);
+
+      if(!(d1 > 1) || !(d2 > 1) || !(totalStakeInput > 0)){
+        alert('Enter valid odds for both bets and a total stake above 0.');
+        return;
+      }
+
+      const scenario1 = computeScenario(d1, d2, totalStakeInput, rounding, '1');
+      const scenario2 = computeScenario(d1, d2, totalStakeInput, rounding, '2');
+
+      const best = scenario1.roi >= scenario2.roi ? scenario1 : scenario2;
+      const other = scenario1.roi >= scenario2.roi ? scenario2 : scenario1;
+
+      document.getElementById('stake1').value = best.stake1.toFixed(2);
+      document.getElementById('stake2').value = best.stake2.toFixed(2);
+
+      updateBadges(best.valueSide);
+
+      document.getElementById('bestSetup').textContent = best.valueSide === '1'
+        ? 'Bet 1 is the value side'
+        : 'Bet 2 is the value side';
+
+      document.getElementById('bestSetupSub').textContent =
+        `Best ROI: ${best.roi.toFixed(2)}% · Alternate ROI: ${other.roi.toFixed(2)}%`;
+
+      setText('outStake1', money(best.stake1));
+      setText('outPayout1', money(best.payout1));
+      setText('outPL1', money(best.pl1), best.pl1 >= 0 ? 'good' : 'bad');
+
+      setText('outStake2', money(best.stake2));
+      setText('outPayout2', money(best.payout2));
+      setText('outPL2', money(best.pl2), best.pl2 >= 0 ? 'good' : 'bad');
+
+      setText('outTotal', money(best.totalStake));
+      setText('outValueProfit', money(best.valueProfit), best.valueProfit >= 0 ? 'good' : 'bad');
+      setText('outROI', best.roi.toFixed(2) + '%', best.roi >= 0 ? 'good' : 'bad');
+
+      const inv = (1 / d1) + (1 / d2);
+      const arbPct = (1 - inv) * 100;
+      let explain = '';
+      explain += `The calculator tested both directions and selected ${best.valueSide === '1' ? 'Bet 1' : 'Bet 2'} as the higher-ROI value side. `;
+      explain += `Combined implied probability: ${(inv * 100).toFixed(2)}%. `;
+      explain += arbPct > 0
+        ? `This is a positive arbitrage setup of about ${arbPct.toFixed(2)}%.`
+        : 'This is not a pure arbitrage at these prices, but the calculator still shows which side gives the better value-side ROI.';
+      document.getElementById('outExplain').textContent = explain;
+    }
+
+    function resetCalc(){
+      document.getElementById('totalStake').value = '100';
+      document.getElementById('rounding').value = 'none';
+      document.getElementById('odds1').value = '-110';
+      document.getElementById('odds2').value = '+135';
+      document.getElementById('oddsType1').value = 'american';
+      document.getElementById('oddsType2').value = 'american';
+      calculate();
+    }
+
+    calculate();
+  </script>
+</body>
+</html>
